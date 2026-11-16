@@ -1,0 +1,13 @@
+{
+  "project": "CloudNest Cloud Storage",
+  "version": "1.0.0",
+  "author": "Alex Rivera",
+  "modules": [
+    "Authentication",
+    "File Manager",
+    "Folder Tree",
+    "Link Sharing",
+    "Analytics"
+  ],
+  "status": "Production Ready"
+}
