@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useFiles } from '../../context/FileContext';
-import { fileAPI } from '../../services/api';
+import { fileAPI, folderAPI } from '../../services/api';
 import { formatBytes } from './FileIcon';
 import {
   UploadCloud,
@@ -8,7 +8,8 @@ import {
   File,
   CheckCircle,
   AlertCircle,
-  Folder
+  Folder,
+  ChevronDown
 } from 'lucide-react';
 
 export const FileUploadModal = () => {
@@ -16,6 +17,7 @@ export const FileUploadModal = () => {
     isUploadModalOpen,
     setIsUploadModalOpen,
     currentFolder,
+    uploadTargetFolder,
     fetchContents,
     fetchStorageAndActivity,
     triggerCelebration
@@ -25,7 +27,27 @@ export const FileUploadModal = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [availableFolders, setAvailableFolders] = useState([]);
+  const [targetFolderId, setTargetFolderId] = useState('root');
   const fileInputRef = useRef(null);
+
+  // Sync initial target folder when modal opens
+  useEffect(() => {
+    if (isUploadModalOpen) {
+      const initialId = uploadTargetFolder?._id || currentFolder?._id || 'root';
+      setTargetFolderId(initialId);
+
+      // Fetch user's folders for destination selector
+      folderAPI
+        .getFolders({ all: 'true' })
+        .then((res) => {
+          setAvailableFolders(res.data.folders || []);
+        })
+        .catch((err) => {
+          console.error('Failed to load folders for upload destination:', err);
+        });
+    }
+  }, [isUploadModalOpen, uploadTargetFolder, currentFolder]);
 
   if (!isUploadModalOpen) return null;
 
@@ -72,8 +94,8 @@ export const FileUploadModal = () => {
       formData.append('files', file);
     });
 
-    if (currentFolder) {
-      formData.append('folderId', currentFolder._id);
+    if (targetFolderId && targetFolderId !== 'root') {
+      formData.append('folderId', targetFolderId);
     }
 
     try {
@@ -98,6 +120,11 @@ export const FileUploadModal = () => {
     }
   };
 
+  const activeDestinationName =
+    targetFolderId === 'root'
+      ? 'My Cloud (Root)'
+      : availableFolders.find((f) => f._id === targetFolderId)?.name || 'Selected Folder';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-150">
       <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-150">
@@ -105,13 +132,9 @@ export const FileUploadModal = () => {
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold text-slate-800">Upload Files</h3>
-            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-              <span>Target:</span>
-              <span className="font-medium text-sky-600 flex items-center gap-1">
-                <Folder className="w-3.5 h-3.5" />
-                {currentFolder ? currentFolder.name : 'Root Folder'}
-              </span>
-            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Add files to your cloud storage
+            </p>
           </div>
           <button
             onClick={() => {
@@ -134,6 +157,38 @@ export const FileUploadModal = () => {
               <span>{errorMsg}</span>
             </div>
           )}
+
+          {/* Destination Folder Selector */}
+          <div className="mb-4 p-3 bg-sky-50/70 border border-sky-100 rounded-xl flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-sky-500 text-white flex items-center justify-center shrink-0">
+                <Folder className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <span className="text-[10px] uppercase font-semibold text-sky-600 tracking-wider block">
+                  Uploading into folder
+                </span>
+                <span className="text-xs font-bold text-slate-800 truncate block">
+                  {activeDestinationName}
+                </span>
+              </div>
+            </div>
+
+            <div className="relative shrink-0">
+              <select
+                value={targetFolderId}
+                onChange={(e) => setTargetFolderId(e.target.value)}
+                className="text-xs font-semibold bg-white border border-sky-200 text-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-sky-300 shadow-2xs cursor-pointer"
+              >
+                <option value="root">Root (My Cloud)</option>
+                {availableFolders.map((f) => (
+                  <option key={f._id} value={f._id}>
+                    Folder: {f.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           {/* Dropzone */}
           <div

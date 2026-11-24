@@ -7,7 +7,8 @@ import {
   Edit2,
   Trash2,
   RotateCcw,
-  Palette
+  UploadCloud,
+  FolderOpen
 } from 'lucide-react';
 
 const folderColors = {
@@ -28,10 +29,12 @@ export const FolderCard = ({ folder }) => {
     restoreItem,
     deletePermanently,
     setRenameTarget,
+    openUploadModal,
     activeTab
   } = useFiles();
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
   const colorClass = folderColors[folder.color] || folderColors.blue;
 
   const handleOpenFolder = () => {
@@ -39,16 +42,41 @@ export const FolderCard = ({ folder }) => {
     navigateToFolder(folder);
   };
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    if (activeTab === 'trash') return;
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      openUploadModal(folder);
+    }
+  };
+
   return (
     <div
       onDoubleClick={handleOpenFolder}
       onClick={(e) => {
-        // Single click also works for seamless navigation
         if (!e.target.closest('button')) {
           handleOpenFolder();
         }
       }}
-      className="group relative bg-white border border-slate-200/80 hover:border-sky-300 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+      onDragOver={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+      }}
+      onDrop={handleDrop}
+      className={`group relative bg-white border rounded-2xl p-4 shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between ${
+        isDragOver
+          ? 'border-sky-500 ring-2 ring-sky-300 bg-sky-50/60 scale-[1.02]'
+          : 'border-slate-200/80 hover:border-sky-300'
+      }`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
@@ -64,6 +92,20 @@ export const FolderCard = ({ folder }) => {
         </div>
 
         <div className="flex items-center gap-0.5">
+          {/* Quick Upload Icon Button */}
+          {activeTab !== 'trash' && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openUploadModal(folder);
+              }}
+              title={`Upload files into ${folder.name}`}
+              className="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+            >
+              <UploadCloud className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Star toggle */}
           {activeTab !== 'trash' && (
             <button
@@ -102,7 +144,7 @@ export const FolderCard = ({ folder }) => {
                   }}
                   className="fixed inset-0 z-30"
                 />
-                <div className="absolute right-0 top-8 w-44 bg-white rounded-xl shadow-xl border border-slate-200/80 py-1.5 z-40 text-xs animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute right-0 top-8 w-48 bg-white rounded-xl shadow-xl border border-slate-200/80 py-1.5 z-40 text-xs animate-in fade-in zoom-in-95 duration-100">
                   {activeTab === 'trash' ? (
                     <>
                       <button
@@ -130,6 +172,29 @@ export const FolderCard = ({ folder }) => {
                     </>
                   ) : (
                     <>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          handleOpenFolder();
+                        }}
+                        className="w-full px-3 py-2 flex items-center gap-2 text-slate-700 hover:bg-slate-50 text-left"
+                      >
+                        <FolderOpen className="w-3.5 h-3.5 text-sky-500" />
+                        <span>Open Folder</span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          openUploadModal(folder);
+                        }}
+                        className="w-full px-3 py-2 flex items-center gap-2 text-sky-700 hover:bg-sky-50 text-left font-semibold"
+                      >
+                        <UploadCloud className="w-3.5 h-3.5 text-sky-600" />
+                        <span>Upload Files Here</span>
+                      </button>
+                      <div className="my-1 border-t border-slate-100" />
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

@@ -27,11 +27,23 @@ export const FileProvider = ({ children }) => {
 
   // Modals state
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadTargetFolder, setUploadTargetFolder] = useState(null);
   const [isNewFolderModalOpen, setIsNewFolderModalOpen] = useState(false);
+  const [isNewDocModalOpen, setIsNewDocModalOpen] = useState(false);
+  const [selectedTag, setSelectedTag] = useState('');
   const [previewFile, setPreviewFile] = useState(null);
   const [shareFile, setShareFile] = useState(null);
   const [moveTarget, setMoveTarget] = useState(null); // { item, type: 'file' | 'folder' }
   const [renameTarget, setRenameTarget] = useState(null); // { item, type: 'file' | 'folder' }
+
+  const openUploadModal = (target = undefined) => {
+    if (target !== undefined) {
+      setUploadTargetFolder(target);
+    } else {
+      setUploadTargetFolder(currentFolder);
+    }
+    setIsUploadModalOpen(true);
+  };
 
   const triggerCelebration = () => {
     try {
@@ -55,7 +67,8 @@ export const FileProvider = ({ children }) => {
         sortBy,
         sortOrder,
         search: searchQuery || undefined,
-        category: activeCategory !== 'all' ? activeCategory : undefined
+        category: activeCategory !== 'all' ? activeCategory : undefined,
+        tag: selectedTag || undefined
       };
 
       const folderParams = {
@@ -115,7 +128,7 @@ export const FileProvider = ({ children }) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated, activeTab, currentFolder, searchQuery, activeCategory, sortBy, sortOrder]);
+  }, [isAuthenticated, activeTab, currentFolder, searchQuery, activeCategory, selectedTag, sortBy, sortOrder]);
 
   // Fetch storage statistics and recent activities
   const fetchStorageAndActivity = useCallback(async () => {
@@ -294,8 +307,15 @@ export const FileProvider = ({ children }) => {
         // Modal states
         isUploadModalOpen,
         setIsUploadModalOpen,
+        uploadTargetFolder,
+        setUploadTargetFolder,
+        openUploadModal,
         isNewFolderModalOpen,
         setIsNewFolderModalOpen,
+        isNewDocModalOpen,
+        setIsNewDocModalOpen,
+        selectedTag,
+        setSelectedTag,
         previewFile,
         setPreviewFile,
         shareFile,

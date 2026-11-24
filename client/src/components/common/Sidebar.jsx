@@ -13,6 +13,7 @@ import {
   Plus,
   Upload,
   FolderPlus,
+  FileCode,
   LogOut,
   UserCheck
 } from 'lucide-react';
@@ -23,8 +24,10 @@ export const Sidebar = ({ mobileOpen, setMobileOpen }) => {
     setActiveTab,
     navigateToRoot,
     storageData,
-    setIsUploadModalOpen,
-    setIsNewFolderModalOpen
+    currentFolder,
+    openUploadModal,
+    setIsNewFolderModalOpen,
+    setIsNewDocModalOpen
   } = useFiles();
   const { user, logout } = useAuth();
   const [newDropdownOpen, setNewDropdownOpen] = useState(false);
@@ -125,7 +128,7 @@ export const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                 <button
                   onClick={() => {
                     setNewDropdownOpen(false);
-                    setIsUploadModalOpen(true);
+                    openUploadModal(currentFolder);
                   }}
                   className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
                 >
@@ -134,7 +137,9 @@ export const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                   </div>
                   <div>
                     <div className="font-medium">File Upload</div>
-                    <div className="text-xs text-slate-400">Upload documents, photos, media</div>
+                    <div className="text-xs text-slate-400">
+                      {currentFolder ? `Upload to ${currentFolder.name}` : 'Upload to My Cloud'}
+                    </div>
                   </div>
                 </button>
 
@@ -151,6 +156,22 @@ export const Sidebar = ({ mobileOpen, setMobileOpen }) => {
                   <div>
                     <div className="font-medium">New Folder</div>
                     <div className="text-xs text-slate-400">Organize with custom folders</div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setNewDropdownOpen(false);
+                    setIsNewDocModalOpen(true);
+                  }}
+                  className="w-full px-4 py-2.5 flex items-center gap-3 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <FileCode className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-medium">New Cloud Note / Doc</div>
+                    <div className="text-xs text-slate-400">Write notes & markdown in browser</div>
                   </div>
                 </button>
               </div>

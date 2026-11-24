@@ -23,6 +23,8 @@ export const Navbar = ({ setMobileOpen }) => {
     setSearchQuery,
     activeCategory,
     setActiveCategory,
+    selectedTag,
+    setSelectedTag,
     sortBy,
     setSortBy,
     sortOrder,
@@ -169,6 +171,19 @@ export const Navbar = ({ setMobileOpen }) => {
               {cat.label}
             </button>
           ))}
+
+          {selectedTag && (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 animate-in fade-in zoom-in-95">
+              <span>#{selectedTag}</span>
+              <button
+                onClick={() => setSelectedTag('')}
+                className="p-0.5 hover:bg-indigo-200/50 rounded-full text-indigo-500 hover:text-indigo-800"
+                title="Clear tag filter"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Selected items bulk actions bar */}

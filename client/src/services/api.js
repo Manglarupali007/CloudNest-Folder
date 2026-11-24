@@ -84,7 +84,10 @@ export const fileAPI = {
   restoreFile: (id) => api.patch(`/files/${id}/restore`),
   deletePermanently: (id) => api.delete(`/files/${id}/permanent`),
   bulkTrash: (fileIds) => api.post('/files/bulk-trash', { fileIds }),
-  bulkDelete: (fileIds) => api.post('/files/bulk-delete', { fileIds })
+  bulkDelete: (fileIds) => api.post('/files/bulk-delete', { fileIds }),
+  createDocument: (data) => api.post('/files/create-document', data),
+  updateFileContent: (id, content) => api.put(`/files/${id}/content`, { content }),
+  updateTags: (id, tags) => api.patch(`/files/${id}/tags`, { tags })
 };
 
 // Share Endpoints

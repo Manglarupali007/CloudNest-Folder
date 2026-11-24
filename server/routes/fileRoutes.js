@@ -13,7 +13,10 @@ const {
   restoreFile,
   deleteFilePermanently,
   bulkTrashFiles,
-  bulkDeleteFiles
+  bulkDeleteFiles,
+  createDocument,
+  updateFileContent,
+  updateTags
 } = require('../controllers/fileController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
@@ -24,6 +27,7 @@ router.route('/')
   .get(getFiles);
 
 router.post('/upload', upload.array('files', 20), uploadFiles);
+router.post('/create-document', createDocument);
 router.post('/bulk-trash', bulkTrashFiles);
 router.post('/bulk-delete', bulkDeleteFiles);
 
@@ -33,6 +37,8 @@ router.route('/:id')
 
 router.get('/:id/download', downloadFile);
 router.get('/:id/preview', previewFile);
+router.put('/:id/content', updateFileContent);
+router.patch('/:id/tags', updateTags);
 router.put('/:id/rename', renameFile);
 router.patch('/:id/move', moveFile);
 router.patch('/:id/star', toggleStarFile);
