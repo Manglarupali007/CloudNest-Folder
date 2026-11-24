@@ -1,7 +1,11 @@
 import axios from 'axios';
-
+const API_BASE_URL = (
+  import.meta.env.VITE_API_URL || ''
+).replace(/\/$/, '') + '/api';
+// const api = axios.create({
+// baseURL: '/api',
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -71,11 +75,12 @@ export const fileAPI = {
     }),
   downloadUrl: (id) => {
     const token = localStorage.getItem('cloudnest_token');
-    return `/api/files/${id}/download?token=${token}`;
+    return `${API_BASE_URL}/files/${id}/download?token=${encodeURIComponent(token || '')}`;
   },
+
   previewUrl: (id) => {
     const token = localStorage.getItem('cloudnest_token');
-    return `/api/files/${id}/preview?token=${token}`;
+    return `${API_BASE_URL}/files/${id}/preview?token=${encodeURIComponent(token || '')}`;
   },
   renameFile: (id, name) => api.put(`/files/${id}/rename`, { name }),
   moveFile: (id, folderId) => api.patch(`/files/${id}/move`, { folderId }),
@@ -96,8 +101,11 @@ export const shareAPI = {
   revokeShareLink: (fileId) => api.delete(`/share/${fileId}`),
   getMyShares: () => api.get('/share/my-shares'),
   getSharedFile: (token) => api.get(`/share/view/${token}`),
-  downloadSharedUrl: (token) => `/api/share/download/${token}`,
-  previewSharedUrl: (token) => `/api/share/preview/${token}`
+  downloadSharedUrl: (token) =>
+    `${API_BASE_URL}/share/download/${token}`,
+
+  previewSharedUrl: (token) =>
+    `${API_BASE_URL}/share/preview/${token}`,
 };
 
 // Analytics Endpoints
