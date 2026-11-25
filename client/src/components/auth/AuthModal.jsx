@@ -32,9 +32,13 @@ export const AuthModal = () => {
         await login(email.trim(), password);
       }
     } catch (err) {
-      setErrorMsg(
-        err.response?.data?.message || err.message || 'Authentication failed'
-      );
+      if (err.response?.status === 404) {
+        setErrorMsg('Backend API endpoint not found (404). Please check VITE_API_URL on Vercel or verify Render backend is active.');
+      } else {
+        setErrorMsg(
+          err.response?.data?.message || err.message || 'Authentication failed'
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +50,11 @@ export const AuthModal = () => {
     try {
       await demoLogin();
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Demo login failed');
+      if (err.response?.status === 404) {
+        setErrorMsg('Backend API endpoint not found (404). Please check VITE_API_URL on Vercel or verify Render backend is active.');
+      } else {
+        setErrorMsg(err.response?.data?.message || err.message || 'Demo login failed');
+      }
     } finally {
       setIsLoading(false);
     }
