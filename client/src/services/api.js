@@ -1,9 +1,25 @@
 import axios from 'axios';
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || ''
-).replace(/\/$/, '') + '/api';
-// const api = axios.create({
-// baseURL: '/api',
+
+// Normalize VITE_API_URL: handles trailing slashes, missing /api, or existing /api gracefully
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+let baseDomain = rawApiUrl.replace(/\/+$/, ''); // Remove trailing slashes
+
+let finalApiBase = '/api';
+if (baseDomain) {
+  if (baseDomain.endsWith('/api')) {
+    finalApiBase = baseDomain;
+  } else {
+    finalApiBase = `${baseDomain}/api`;
+  }
+}
+
+export const API_BASE_URL = finalApiBase;
+export const BACKEND_URL = baseDomain.replace(/\/api$/, '');
+
+if (import.meta.env.DEV) {
+  console.log('[CloudNest API] Base URL:', API_BASE_URL);
+}
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {

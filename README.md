@@ -239,3 +239,34 @@ npm run dev
 1. Open `http://localhost:5173` in your browser.
 2. Click **"Explore with 1-Click Demo Account"** to immediately enter with sample folders, technical specs, SVGs, and markdown architecture documents pre-populated!
 3. Alternatively, register a new user account with your own email and password.
+
+---
+
+## 🌐 Production Deployment Guide (Vercel + Render)
+
+### 1. Backend on Render (`https://render.com`)
+1. Create a **New Web Service** connected to your GitHub repository.
+2. Settings:
+   - **Root Directory**: `server`
+   - **Build Command**: `npm install`
+   - **Start Command**: `node server.js`
+3. In **Environment Variables**, add:
+   - `PORT`: `5000` (or leave default)
+   - `MONGODB_URI`: Your MongoDB Atlas URI (`mongodb+srv://<user>:<password>@cluster.mongodb.net/cloudnest?retryWrites=true&w=majority`)
+   - `JWT_SECRET`: `cloudnest_jwt_secret_production_2026`
+   - `JWT_EXPIRE`: `30d`
+   - `NODE_ENV`: `production`
+   - `CLIENT_URL`: `https://<your-project>.vercel.app`
+4. In **MongoDB Atlas** -> **Network Access**: Add `0.0.0.0/0` (Allow Access from Anywhere) so Render can connect.
+5. Copy your Render backend URL (e.g. `https://cloudnest-api.onrender.com`).
+
+### 2. Frontend on Vercel (`https://vercel.com`)
+1. Import your GitHub repository in Vercel.
+2. Settings:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: `client` (Click Edit and select the `client` directory)
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. In **Environment Variables**:
+   - `VITE_API_URL`: `https://<your-render-backend>.onrender.com` *(e.g. `https://cloudnest-api.onrender.com`)*
+4. Click **Deploy**. If you change `VITE_API_URL` later, remember to click **Redeploy** so Vite injects the new URL at build time.

@@ -22,24 +22,39 @@ connectDB();
 
 const app = express();
 
-// Middlewares
-// app.use(cors({
-//   origin: '*',
-//   credentials: true
-// }));
+// Middlewares & CORS
 const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'http://localhost:5173'
+  process.env.CLIENT_URL ? process.env.CLIENT_URL.replace(/\/+$/, '') : null,
+  'http://localhost:5173',
+  'http://localhost:3000'
 ].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    // Allow server-to-server or direct tool requests without origin
+    if (!origin) return callback(null, true);
+
+    // Allow localhost during local development
+    if (origin.startsWith('http://localhost:')) {
       return callback(null, true);
     }
-    callback(new Error('Not allowed by CORS'));
+
+    // Allow all Vercel domains (*.vercel.app)
+    if (origin.endsWith('.vercel.app') || origin.includes('vercel.app')) {
+      return callback(null, true);
+    }
+
+    // Allow configured CLIENT_URL
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Default allow for permissive API usage
+    return callback(null, true);
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -50,6 +65,17 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Serve uploaded files statically if needed
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Root landing endpoint
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    appName: 'CloudNest API Server',
+    message: 'Backend server is active and running',
+    healthCheck: '/api/health',
+    timestamp: new Date().toISOString()
+  });
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
